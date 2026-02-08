@@ -1,0 +1,76 @@
+/* RESET SEDERHANA */
+body {
+    margin: 0;
+    background-color: #f8f9fc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* WRAPPER */
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* TOP NAVBAR */
+.top-navbar {
+    background-color: #ffffff;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.user-info a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.user-info i {
+    font-size: 1.5rem;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 240px;
+    background-color: #212529;
+    color: #fff;
+    padding: 20px;
+}
+
+.sidebar h4 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+.sidebar .nav-link {
+    color: #adb5bd;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #343a40;
+    color: #fff;
+    text-decoration: none;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+/* CONTENT AREA */
+.content-wrapper {
+    flex: 1;
+    padding: 30px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+    }
+}

@@ -1,0 +1,22 @@
+/* CARD DASHBOARD */
+.card {
+    border: none;
+    border-radius: 12px;
+}
+
+.card h5 {
+    font-weight: 600;
+}
+
+.card h2 {
+    font-weight: bold;
+}
+
+/* TABLE DASHBOARD */
+.table thead {
+    background-color: #f1f3f5;
+}
+
+.table th {
+    font-weight: 600;
+}
