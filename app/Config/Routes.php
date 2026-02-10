@@ -33,6 +33,12 @@ $routes->group('kasir', ['filter' => 'auth'], function($routes) {
     $routes->post('bayar/(:num)', 'Kasir::bayar/$1');
 });
 
+$routes->get('pasien', 'Pasien::index');
+$routes->get('pasien/booking', 'Pasien::booking');
+$routes->post('pasien/store', 'Pasien::store');
+$routes->get('pasien/riwayat', 'Pasien::riwayat');
+$routes->get('pasien/antrian', 'Pasien::antrian');
+$routes->get('pasien/detail/(:num)', 'Pasien::detail/$1');
 
 $routes->get('/pendaftaran', 'Pendaftaran::index');
 $routes->get('/pendaftaran/pasien', 'Pendaftaran::pasien');
