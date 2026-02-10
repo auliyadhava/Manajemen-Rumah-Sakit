@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Pharmacy;
 use CodeIgniter\Model;
 
 class PrescriptionItemModel extends Model {

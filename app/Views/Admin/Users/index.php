@@ -1,4 +1,4 @@
-<?= $this->extend('layout/main') ?>
+<?= $this->extend('admin/layout/main') ?>
 
 <?= $this->section('content') ?>
 <div class="card mt-3">

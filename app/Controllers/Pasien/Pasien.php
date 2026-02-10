@@ -1,46 +1,98 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Pasien;
 
 use CodeIgniter\Controller;
 
 class Pasien extends Controller
 {
-    // --- 1. Dashboard Utama ---
+    protected $db;
+
+    public function __construct()
+    {
+        $this->db = \Config\Database::connect();
+    }
+
+    /* ===============================
+     * HELPER: ambil patient_id dari session
+     * =============================== */
+    private function getPatientId()
+    {
+        $userId = session()->get('user_id');
+
+        if (!$userId) {
+            return null;
+        }
+
+        $patient = $this->db->table('patients')
+            ->where('user_id', $userId)
+            ->get()
+            ->getRow();
+
+        return $patient ? $patient->patient_id : null;
+    }
+
+    /* ===============================
+     * 1. DASHBOARD PASIEN
+     * =============================== */
     public function index()
     {
+        if (!session()->get('user_id')) {
+            return redirect()->to('/login');
+        }
+
         return view('pasien/dashboard');
     }
 
-    // --- 2. Booking Online (Poin 2) ---
+    /* ===============================
+     * 2. FORM BOOKING
+     * =============================== */
     public function booking()
     {
-        $db = \Config\Database::connect();
-        // Mengambil daftar poli agar dropdown di view dinamis
-        $data['departments'] = $db->table('departments')->get()->getResult();
+        $patientId = $this->getPatientId();
+
+        if (!$patientId) {
+            return redirect()->to('/login');
+        }
+
+        $data['departments'] = $this->db
+            ->table('departments')
+            ->get()
+            ->getResult();
+
         return view('pasien/booking', $data);
     }
 
-    // Proses simpan booking ke database
+    /* ===============================
+     * 2b. SIMPAN BOOKING
+     * =============================== */
     public function store()
     {
+        $patientId = $this->getPatientId();
+
+        if (!$patientId) {
+            return redirect()->to('/login');
+        }
+
         $db = \Config\Database::connect();
 
-        // Ambil ID User dari Session Login
-        $userId = session()->get('user_id');
+        $departmentId = $this->request->getPost('department_id');
 
-        // Cari ID Patient berdasarkan User ID tersebut
-        $pasien = $db->table('patients')->where('user_id', $userId)->get()->getRow();
+        // 🔍 Ambil 1 dokter berdasarkan poli
+        $doctor = $db->table('doctors')
+            ->where('department_id', $departmentId)
+            ->get()
+            ->getRow();
 
-        if (!$pasien) {
-            return redirect()->back()->with('error', 'Data pasien tidak ditemukan.');
+        if (!$doctor) {
+            return redirect()->back()->with('error', 'Dokter untuk poli ini belum tersedia.');
         }
 
         $data = [
-            'patient_id'    => $pasien->patient_id, // Sekarang Dinamis!
+            'patient_id'    => $patientId,
             'schedule_date' => $this->request->getPost('schedule_date'),
-            'department_id' => $this->request->getPost('department_id'),
-            'doctor_id'     => 1, // Logic pemilihan dokter bisa dikembangkan nanti
+            'department_id' => $departmentId,
+            'doctor_id'     => $doctor->doctor_id,
             'status'        => 'waiting'
         ];
 
@@ -49,81 +101,102 @@ class Pasien extends Controller
         return redirect()->to('/pasien/riwayat')->with('success', 'Booking berhasil dibuat!');
     }
 
-    // --- 3. Riwayat Appointment (Poin 3) ---
+
+    /* ===============================
+     * 3. RIWAYAT APPOINTMENT
+     * =============================== */
     public function riwayat()
     {
-        $db = \Config\Database::connect();
+        $patientId = $this->getPatientId();
 
-        // Mengambil riwayat booking pasien
-        $query = $db->query("
-            SELECT a.appointment_id,
-                   a.schedule_date,
-                   a.status,
-                   d.name AS department
+        if (!$patientId) {
+            return redirect()->to('/login');
+        }
+
+        $data['appointments'] = $this->db->query("
+            SELECT 
+                a.appointment_id,
+                a.schedule_date,
+                a.status,
+                d.name AS department
             FROM appointments a
             JOIN departments d ON d.department_id = a.department_id
-            WHERE a.patient_id = 3
+            WHERE a.patient_id = ?
             ORDER BY a.schedule_date DESC
-        ");
-
-        $data['appointments'] = $query->getResult();
+        ", [$patientId])->getResult();
 
         return view('pasien/riwayat', $data);
     }
 
-    // --- 5. Monitor Antrian (Poin 5) ---
+    /* ===============================
+     * 4. MONITOR ANTRIAN
+     * =============================== */
     public function antrian()
     {
-        $db = \Config\Database::connect();
+        $patientId = $this->getPatientId();
 
-        // Menampilkan antrian aktif milik pasien
-        $query = $db->query("
-            SELECT q.queue_number,
-                   q.status,
-                   a.schedule_date,
-                   d.name AS department
+        if (!$patientId) {
+            return redirect()->to('/login');
+        }
+
+        $data['queues'] = $this->db->query("
+            SELECT 
+                q.queue_number,
+                q.status,
+                a.schedule_date,
+                d.name AS department
             FROM queues q
             JOIN appointments a ON a.appointment_id = q.appointment_id
             JOIN departments d ON d.department_id = a.department_id
-            WHERE a.patient_id = 3
-            AND q.status != 'done'
+            WHERE a.patient_id = ?
+              AND q.status != 'done'
             ORDER BY q.queue_id DESC
-        ");
-
-        $data['queues'] = $query->getResult();
+        ", [$patientId])->getResult();
 
         return view('pasien/antrian', $data);
     }
 
-    // --- 7, 8, 9. Hasil Medis, Resep, & Pembayaran (Poin 7-9) ---
+    /* ===============================
+     * 5. DETAIL PEMERIKSAAN
+     * =============================== */
     public function detail_pemeriksaan($appointment_id)
     {
-        $db = \Config\Database::connect();
+        $patientId = $this->getPatientId();
 
-        // Ambil Data Pemeriksaan/Diagnosa (Poin 7)
-        $data['pemeriksaan'] = $db->table('examinations')
+        if (!$patientId) {
+            return redirect()->to('/login');
+        }
+
+        // pemeriksaan
+        $data['pemeriksaan'] = $this->db
+            ->table('examinations')
             ->where('appointment_id', $appointment_id)
-            ->get()->getRow();
+            ->get()
+            ->getRow();
 
-        // Ambil Data Resep Obat (Poin 9)
-        // Jika data pemeriksaan sudah ada, ambil resepnya
+        // resep
         if ($data['pemeriksaan']) {
-            $data['resep'] = $db->query(
-                "
-                SELECT m.name as nama_obat, pi.dosage, pi.quantity, pi.instructions
+            $data['resep'] = $this->db->query("
+                SELECT 
+                    m.name AS nama_obat,
+                    pi.dosage,
+                    pi.quantity,
+                    pi.instructions
                 FROM prescriptions p
                 JOIN prescription_items pi ON p.prescription_id = pi.prescription_id
                 JOIN medicines m ON pi.medicine_id = m.medicine_id
-                WHERE p.exam_id = " . $data['pemeriksaan']->exam_id
-            )->getResult();
+                WHERE p.exam_id = ?
+            ", [$data['pemeriksaan']->exam_id])->getResult();
         } else {
             $data['resep'] = [];
         }
 
-        // Ambil Data Pembayaran (Poin 8)
-        $data['pembayaran'] = $db->table('payments')
+        // pembayaran
+        $data['pembayaran'] = $this->db
+            ->table('payments')
             ->where('appointment_id', $appointment_id)
-            ->get()->getRow();
+            ->get()
+            ->getRow();
 
         return view('pasien/detail_pemeriksaan', $data);
     }

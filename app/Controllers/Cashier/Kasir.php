@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Cashier;
 
 use App\Controllers\BaseController;
-use App\Models\Admin\PaymentModel;
-use App\Models\Admin\AppointmentModel;
+use App\Models\Cashier\PaymentModel;
+use App\Models\Registration\AppointmentModel;
 
 class Kasir extends BaseController
 {

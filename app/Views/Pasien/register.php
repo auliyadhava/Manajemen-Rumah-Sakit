@@ -70,7 +70,7 @@
         </div>
     <?php endif; ?>
 
-    <form action="<?= base_url('register/process') ?>" method="post">
+    <form action="<?= base_url('pasien/register/process') ?>" method="post">
         <?= csrf_field() ?>
 
         <div class="form-group">

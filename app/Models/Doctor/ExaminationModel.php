@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Doctor;
 use CodeIgniter\Model;
 
 class ExaminationModel extends Model {

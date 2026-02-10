@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Doctor;
 
-use App\Models\Admin\ExaminationModel;
-use App\Models\Admin\PrescriptionModel;
-use App\Models\Admin\PrescriptionItemModel;
-use App\Models\Admin\AppointmentModel;
-use App\Models\Admin\QueueModel;
+use App\Models\Doctor\ExaminationModel;
+use App\Models\Pharmacy\PrescriptionModel;
+use App\Models\Pharmacy\PrescriptionItemModel;
+use App\Models\Registration\AppointmentModel;
+use App\Models\Registration\QueueModel;
+use App\Controllers\BaseController;
 
 class DoctorController extends BaseController
 {

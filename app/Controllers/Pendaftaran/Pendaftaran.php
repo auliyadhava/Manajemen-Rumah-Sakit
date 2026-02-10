@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Pendaftaran;
 
 use App\Controllers\BaseController;
-use App\Models\Admin\AppointmentModel;
-use App\Models\Admin\QueueModel;
+use App\Models\Registration\AppointmentModel;
+use App\Models\Registration\QueueModel;
 
 class Pendaftaran extends BaseController
 {

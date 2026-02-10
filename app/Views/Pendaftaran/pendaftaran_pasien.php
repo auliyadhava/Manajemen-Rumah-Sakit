@@ -45,9 +45,9 @@
                                     </td>
                                     <td>
                                         <?php if ($row['status'] === 'waiting'): ?>
-                                            <a href="<?= base_url('pendaftaran/konfirmasi/'.$row['appointment_id']) ?>"
-                                               class="btn btn-success btn-sm"
-                                               onclick="return confirm('Konfirmasi pasien ini?')">
+                                            <a href="<?= base_url('pendaftaran/pendaftaran/konfirmasi/' . $row['appointment_id']) ?>"
+                                                class="btn btn-success btn-sm"
+                                                onclick="return confirm('Konfirmasi pasien ini?')">
                                                 <i class="bi bi-check-circle"></i> Konfirmasi
                                             </a>
                                         <?php else: ?>
@@ -75,46 +75,46 @@
 </div>
 
 <!-- MODAL KARCIS ANTRIAN -->
-<?php if (session()->getFlashdata('queue_ticket')): 
+<?php if (session()->getFlashdata('queue_ticket')):
     $ticket = session()->getFlashdata('queue_ticket');
 ?>
 
-<div class="modal fade" id="ticketModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+    <div class="modal fade" id="ticketModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
 
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">
-            <i class="bi bi-ticket-perforated"></i> Kartu Antrian
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-ticket-perforated"></i> Kartu Antrian
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
 
-      <div class="modal-body text-center">
-        <h1 class="display-3 fw-bold"><?= $ticket['queue_number'] ?></h1>
-        <p class="fw-semibold mb-1"><?= esc($ticket['full_name']) ?></p>
-        <p class="mb-1">Poli: <strong><?= esc($ticket['department']) ?></strong></p>
-        <p class="text-muted"><?= date('d M Y', strtotime($ticket['schedule_date'])) ?></p>
+                <div class="modal-body text-center">
+                    <h1 class="display-3 fw-bold"><?= $ticket['queue_number'] ?></h1>
+                    <p class="fw-semibold mb-1"><?= esc($ticket['full_name']) ?></p>
+                    <p class="mb-1">Poli: <strong><?= esc($ticket['department']) ?></strong></p>
+                    <p class="text-muted"><?= date('d M Y', strtotime($ticket['schedule_date'])) ?></p>
 
-        <hr>
-        <small class="text-muted">Silakan menunggu panggilan</small>
-      </div>
+                    <hr>
+                    <small class="text-muted">Silakan menunggu panggilan</small>
+                </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-        <button class="btn btn-primary" onclick="window.print()">
-            <i class="bi bi-printer"></i> Cetak
-        </button>
-      </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Cetak
+                    </button>
+                </div>
 
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-    const ticketModal = new bootstrap.Modal(document.getElementById('ticketModal'));
-    ticketModal.show();
-</script>
+    <script>
+        const ticketModal = new bootstrap.Modal(document.getElementById('ticketModal'));
+        ticketModal.show();
+    </script>
 
 <?php endif ?>
 

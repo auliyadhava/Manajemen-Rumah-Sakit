@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Apoteker;
 
-use App\Models\Admin\PrescriptionModel;
-use App\Models\Admin\PrescriptionItemModel;
-use App\Models\Admin\MedicineModel;
-use App\Models\Admin\MedicinePickupModel;
-use App\Models\Admin\PaymentModel;
+use App\Models\Pharmacy\PrescriptionModel;
+use App\Models\Pharmacy\PrescriptionItemModel;
+use App\Models\Pharmacy\MedicineModel;
+use App\Models\Pharmacy\MedicinePickupModel;
+use App\Models\Cashier\PaymentModel;
+use App\Controllers\BaseController;
 
 class Apoteker extends BaseController
 {

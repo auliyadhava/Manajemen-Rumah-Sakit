@@ -31,6 +31,24 @@
             padding-bottom: 10px;
         }
 
+        .alert {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #fdecea;
+            color: #c0392b;
+        }
+
+        .alert-success {
+            background: #eafaf1;
+            color: #27ae60;
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
@@ -47,7 +65,7 @@
             padding: 12px;
             border: 1px solid #dcdfe6;
             border-radius: 6px;
-            box-sizing: border-box; /* Biar padding nggak ngerusak lebar */
+            box-sizing: border-box;
             font-size: 14px;
         }
 
@@ -61,7 +79,6 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
         }
 
         button:hover {
@@ -76,10 +93,6 @@
             color: #7f8c8d;
             font-size: 14px;
         }
-
-        .btn-cancel:hover {
-            color: #c0392b;
-        }
     </style>
 </head>
 <body>
@@ -87,26 +100,47 @@
 <div class="form-container">
     <h2>🏥 Booking Online</h2>
 
-    <form method="post" action="<?= base_url('pasien/store') ?>">
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-error">
+            <?= session()->getFlashdata('error') ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success">
+            <?= session()->getFlashdata('success') ?>
+        </div>
+    <?php endif; ?>
+
+    <form method="post" action="<?= base_url('pasien/booking/store') ?>">
         <?= csrf_field() ?>
 
         <div class="form-group">
             <label>Tanggal Kunjungan</label>
-            <input type="date" name="schedule_date" required>
+            <input
+                type="date"
+                name="schedule_date"
+                min="<?= date('Y-m-d') ?>"
+                required
+            >
         </div>
 
         <div class="form-group">
             <label>Pilih Poliklinik</label>
             <select name="department_id" required>
                 <option value="">-- Pilih Poli --</option>
-                <?php foreach($departments as $d): ?>
-                    <option value="<?= $d->department_id ?>"><?= $d->name ?></option>
+                <?php foreach ($departments as $d): ?>
+                    <option value="<?= $d->department_id ?>">
+                        <?= esc($d->name) ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
         </div>
 
         <button type="submit">Daftar Sekarang</button>
-        <a href="<?= base_url('pasien/riwayat') ?>" class="btn-cancel">Batal & Kembali</a>
+        <a href="<?= base_url('pasien/riwayat') ?>" class="btn-cancel">
+            Batal & Kembali
+        </a>
     </form>
 </div>
 
