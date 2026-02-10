@@ -12,7 +12,7 @@ $routes->get('/', 'Auth::index');
 $routes->post('/login/auth', 'Auth::loginProcess');
 $routes->get('/logout', 'Auth::logout');
 
-$routes->group('admin', ['filter' => 'auth'], function($routes) {
+$routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('users', 'Admin\Users::index');
     $routes->get('users/create', 'Admin\Users::create');
     $routes->post('users/store', 'Admin\Users::store');
@@ -21,18 +21,27 @@ $routes->group('admin', ['filter' => 'auth'], function($routes) {
     $routes->get('users/delete/(:num)', 'Admin\Users::delete/$1');
 });
 
-$routes->group('apoteker', ['filter' => 'auth'], function($routes) {
-    $routes->get('/', 'Apoteker::index');
+$routes->group('apoteker', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/apoteker', 'Apoteker::index');
     $routes->get('detail/(:num)', 'Apoteker::detail/$1');
     $routes->post('pickup/(:num)', 'Apoteker::pickup/$1');
 });
 
-$routes->group('kasir', ['filter' => 'auth'], function($routes) {
+$routes->group('kasir', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'Kasir::index');
     $routes->get('detail/(:num)', 'Kasir::detail/$1');
     $routes->post('bayar/(:num)', 'Kasir::bayar/$1');
 });
 
+$routes->group('dokter', ['filter' => 'auth'], function ($routes) {
+    $routes->get('dashboard', 'DoctorController::index');
+    $routes->get('/', 'DoctorController::index');
+    $routes->get('examine/(:num)', 'DoctorController::examine/$1');
+    $routes->post('submitExamination', 'DoctorController::submitExamination');
+});
+
+$routes->get('pasien/register', 'Register::index');
+$routes->post('pasien/register/process', 'Register::process');
 $routes->get('pasien', 'Pasien::index');
 $routes->get('pasien/booking', 'Pasien::booking');
 $routes->post('pasien/store', 'Pasien::store');
@@ -43,4 +52,3 @@ $routes->get('pasien/detail/(:num)', 'Pasien::detail/$1');
 $routes->get('/pendaftaran', 'Pendaftaran::index');
 $routes->get('/pendaftaran/pasien', 'Pendaftaran::pasien');
 $routes->get('/pendaftaran/antrian', 'Pendaftaran::antrian');
-

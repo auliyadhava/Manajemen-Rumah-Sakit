@@ -1,8 +1,8 @@
 <?php namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Models\UserModel;
-use App\Models\RoleModel;
+use App\Models\Admin\UserModel;
+use App\Models\Admin\RoleModel;
 
 class Users extends BaseController
 {
