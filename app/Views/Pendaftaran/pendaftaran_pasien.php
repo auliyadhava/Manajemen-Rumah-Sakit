@@ -44,15 +44,15 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <?php if ($row['status'] === 'waiting'): ?>
-                                            <a href="<?= base_url('pendaftaran/konfirmasi/' . $row['appointment_id']) ?>"
+                                        <?php if ($row['status'] === 'approved'): ?>
+                                            <a href="<?= base_url('pendaftaran/konfirmasi_hadir/' . $row['appointment_id']) ?>"
                                                 class="btn btn-success btn-sm"
-                                                onclick="return confirm('Konfirmasi pasien ini?')">
+                                                onclick="return confirm('Konfirmasi kehadiran pasien ini?')">
                                                 <i class="bi bi-check-circle"></i> Konfirmasi
                                             </a>
                                         <?php else: ?>
                                             <button class="btn btn-secondary btn-sm" disabled>
-                                                Sudah dikonfirmasi
+                                                <i class="bi bi-check-all"></i> Sudah dikonfirmasi
                                             </button>
                                         <?php endif ?>
                                     </td>

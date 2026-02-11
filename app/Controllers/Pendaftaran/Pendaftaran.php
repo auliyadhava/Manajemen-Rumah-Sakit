@@ -135,36 +135,27 @@ class Pendaftaran extends BaseController
        ======================= */
     public function konfirmasi_hadir($appointment_id)
     {
-        $db = \Config\Database::connect();
+        // 1. Cek apakah yang akses adalah Petugas (Opsional: tambahkan filter auth)
 
-        // 1. Cek Data Appointment
         $appointment = $this->appointmentModel->find($appointment_id);
 
         if (!$appointment) {
-            return redirect()->back()->with('error', 'Data tidak ditemukan');
+            return redirect()->back()->with('error', 'Data pendaftaran tidak ditemukan.');
         }
 
-        // Hanya boleh konfirmasi hadir jika status sudah 'approved'
-        if ($appointment['status'] != 'approved') {
-            return redirect()->back()->with('error', 'Pasien belum disetujui admin (Approved) atau status tidak valid.');
+        // PASTIKAN: Hanya status 'approved' (janji temu valid) yang bisa check-in
+        if ($appointment['status'] !== 'approved') {
+            return redirect()->back()->with('error', 'Pasien belum diverifikasi atau sudah masuk antrean.');
         }
 
-        // 2. Cek Duplikat Antrian
-        $cekAntrian = $this->queueModel->where('appointment_id', $appointment_id)->first();
-        if ($cekAntrian) {
-            return redirect()->back()->with('error', 'Pasien ini sudah masuk antrian.');
-        }
-
+        $db = \Config\Database::connect();
         $db->transStart();
 
-        // 3. Update Status Appointment jadi 'waiting' (Menunggu Dokter)
-        $this->appointmentModel->update($appointment_id, [
-            'status' => 'waiting'
-        ]);
+        // 2. Update Status ke 'waiting' (Artinya pasien sudah di lokasi & menunggu dokter)
+        $this->appointmentModel->update($appointment_id, ['status' => 'waiting']);
 
-        // 4. Hitung Nomor Antrean Hari Ini
+        // 3. Generate Nomor Antrean (Hanya dibuat SAAT PASIEN DATANG)
         $today = date('Y-m-d');
-
         $lastQueue = $this->queueModel
             ->join('appointments', 'appointments.appointment_id = queues.appointment_id')
             ->where('appointments.schedule_date', $today)
@@ -173,38 +164,32 @@ class Pendaftaran extends BaseController
 
         $queueNumber = $lastQueue ? ($lastQueue['queue_number'] + 1) : 1;
 
-        // 5. Insert ke Tabel Queues
         $this->queueModel->insert([
             'appointment_id' => $appointment_id,
             'queue_number'   => $queueNumber,
-            'status'         => 'waiting',
+            'status'         => 'waiting', // Menunggu dipanggil poli
             'created_at'     => date('Y-m-d H:i:s')
         ]);
 
         $db->transComplete();
 
-        if ($db->transStatus() === FALSE) {
-            return redirect()->back()->with('error', 'Gagal memproses kehadiran.');
-        }
-
-        // 6. Ambil Data Lengkap untuk Tiket
+        // 4. Siapkan Data Tiket untuk di-print petugas
         $detail = $this->appointmentModel
-            ->select('users.full_name, departments.name as department_name, appointments.schedule_date')
+            ->select('users.full_name, departments.name as department_name')
             ->join('patients', 'patients.patient_id = appointments.patient_id')
             ->join('users', 'users.user_id = patients.user_id')
             ->join('departments', 'departments.department_id = appointments.department_id')
             ->where('appointments.appointment_id', $appointment_id)
             ->first();
 
-        // 7. Simpan Tiket ke Session
         session()->setFlashdata('queue_ticket', [
-            'queue_number'   => str_pad($queueNumber, 3, '0', STR_PAD_LEFT),
-            'full_name'      => $detail['full_name'],
-            'department'     => $detail['department_name'],
-            'schedule_date'  => $detail['schedule_date']
+            'queue_number'  => str_pad($queueNumber, 3, '0', STR_PAD_LEFT),
+            'full_name'     => $detail['full_name'],
+            'department'    => $detail['department_name'],
+            'schedule_date' => $today
         ]);
 
-        return redirect()->to('/pendaftaran/pasien')->with('success', 'Kehadiran Dikonfirmasi! Tiket dicetak.');
+        return redirect()->to('/pendaftaran/pasien')->with('success', 'Check-in berhasil! Silakan cetak nomor antrean.');
     }
 
     /* =======================

@@ -65,5 +65,5 @@ $routes->group('pendaftaran', function ($routes) {
     $routes->get('/', 'Pendaftaran\Pendaftaran::index');
     $routes->get('pasien', 'Pendaftaran\Pendaftaran::pasien');
     $routes->get('antrian', 'Pendaftaran\Pendaftaran::antrian');
-    $routes->get('konfirmasi/(:num)', 'Pendaftaran\Pendaftaran::konfirmasi/$1');
+    $routes->get('konfirmasi_hadir/(:num)', 'Pendaftaran\Pendaftaran::konfirmasi_hadir/$1');
 });
