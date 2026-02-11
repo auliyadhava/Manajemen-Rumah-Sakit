@@ -8,143 +8,92 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        /* SIDEBAR */
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+        
         .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 240px;
-            background: linear-gradient(180deg, #0d6efd, #084298);
-            padding-top: 20px;
-            padding-bottom: 20px;
-            /* Tambahan padding bawah */
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-
-            /* Agar Logout ada di paling bawah */
-            display: flex;
-            flex-direction: column;
+            position: fixed; top: 0; left: 0; height: 100vh; width: 260px;
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+            display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.1); z-index: 1000;
         }
 
-        .sidebar h4 {
-            color: #fff;
-            text-align: center;
-            margin-bottom: 30px;
-            font-weight: bold;
-        }
-
-        /* Menu Container untuk memisahkan menu atas dan tombol logout */
-        .menu-items {
-            flex-grow: 1;
-            /* Mengisi ruang kosong */
-        }
+        .sidebar h4 { color: #fff; text-align: center; padding: 25px 0; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .menu-items { flex-grow: 1; overflow-y: auto; padding: 10px 0; }
 
         .sidebar a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: #e9ecef;
-            text-decoration: none;
-            font-size: 15px;
-            transition: all 0.3s;
+            display: flex; align-items: center; padding: 12px 25px; color: #94a3b8;
+            text-decoration: none; font-size: 15px; transition: 0.3s;
         }
 
-        .sidebar a i {
-            margin-right: 10px;
-            font-size: 18px;
-        }
+        .sidebar a i { margin-right: 12px; font-size: 1.2rem; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.05); color: #fff; border-left: 4px solid #3b82f6; }
 
-        .sidebar a:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            color: #fff;
-        }
+        .logout-link { margin-top: auto; padding: 15px 25px; color: #f87171 !important; border-top: 1px solid rgba(255,255,255,0.1); }
+        .logout-link:hover { background: #ef4444 !important; color: white !important; }
 
-        /* Styling Khusus Tombol Logout */
-        .logout-link {
-            margin-top: auto;
-            /* Memastikan tetap di bawah */
-            background-color: rgba(220, 53, 69, 0.1);
-            /* Merah transparan */
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logout-link:hover {
-            background-color: #dc3545 !important;
-            /* Merah Solid saat hover */
-            color: white !important;
-        }
-
-        /* CONTENT */
-        .content {
-            margin-left: 240px;
-            padding: 30px;
-            min-height: 100vh;
-        }
+        .content { margin-left: 260px; padding: 35px; min-height: 100vh; }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
     </style>
 </head>
 
 <body>
 
     <div class="sidebar">
-        <h4>RS Panel</h4>
+        <h4><i class="bi bi-hospital"></i> RS PANEL</h4>
 
         <div class="menu-items">
-            <a href="/dashboard">
+            <a href="<?= base_url('admin/dashboard') ?>" class="<?= (uri_string() == 'admin/dashboard') ? 'active' : '' ?>">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
-
-            <?php if (session()->get('role') == 'admin'): ?>
-                <a href="/admin/users">
-                    <i class="bi bi-people"></i> Manajemen User
-                </a>
-            <?php endif; ?>
-
+            <a href="<?= base_url('admin/pendaftaran') ?>">
+                <i class="bi bi-pencil-square"></i> Pendaftaran
+            </a>
+            <a href="#">
+                <i class="bi bi-person-check"></i> Kedatangan
+            </a>
+            <a href="#">
+                <i class="bi bi-people"></i> Antrian
+            </a>
+            <a href="#">
+                <i class="bi bi-stethoscope"></i> Pemeriksaan
+            </a>
+            <a href="#">
+                <i class="bi bi-cash-stack"></i> Pembayaran
+            </a>
+            <a href="#">
+                <i class="bi bi-capsule"></i> Pengambilan Obat
+            </a>
+            <a href="<?= base_url('admin/users') ?>" class="<?= (uri_string() == 'admin/users') ? 'active' : '' ?>">
+                <i class="bi bi-person-gear"></i> Manajemen User
+            </a>
         </div>
+
         <a href="/logout" class="logout-link" id="btn-logout">
             <i class="bi bi-box-arrow-right"></i> Logout
         </a>
     </div>
 
     <div class="content">
-        <?php if (session()->getFlashdata('success')): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <?= session()->getFlashdata('success') ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <?php endif; ?>
-
         <?= $this->renderSection('content') ?>
     </div>
 
     <script>
         document.getElementById('btn-logout').addEventListener('click', function(e) {
-            e.preventDefault(); // Mencegah link langsung jalan
-
+            e.preventDefault();
             Swal.fire({
-                title: 'Yakin ingin keluar?',
-                text: "Anda harus login kembali untuk mengakses halaman ini.",
-                icon: 'warning',
+                title: 'Keluar dari sistem?',
+                icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Keluar!',
-                cancelButtonText: 'Batal'
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Logout'
             }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "/logout"; // Redirect manual
-                }
+                if (result.isConfirmed) window.location.href = "<?= base_url('logout') ?>";
             })
         });
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

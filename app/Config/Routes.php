@@ -13,12 +13,17 @@ $routes->post('/login/auth', 'Auth::loginProcess');
 $routes->get('/logout', 'Auth::logout');
 
 $routes->group('admin', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'Admin\Admin::index');
+    $routes->get('dashboard', 'Admin\Admin::index');
+    $routes->get('pendaftaran', 'Admin\Admin::pendaftaran');
     $routes->get('users', 'Admin\Users::index');
     $routes->get('users/create', 'Admin\Users::create');
     $routes->post('users/store', 'Admin\Users::store');
     $routes->get('users/edit/(:num)', 'Admin\Users::edit/$1');
     $routes->post('users/update/(:num)', 'Admin\Users::update/$1');
     $routes->get('users/delete/(:num)', 'Admin\Users::delete/$1');
+    $routes->get('pendaftaran/edit/(:num)', 'Admin\Admin::edit_pendaftaran/$1');
+    $routes->post('pendaftaran/update/(:num)', 'Admin\Admin::update_pendaftaran/$1');
 });
 
 $routes->group('apoteker', ['filter' => 'auth'], function ($routes) {

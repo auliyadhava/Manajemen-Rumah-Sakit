@@ -67,7 +67,7 @@ class Auth extends BaseController
         // Sesuaikan dengan folder controller teman-teman Anda
         switch ($role) {
             case 'admin':
-                return redirect()->to('/admin/users');
+                return redirect()->to('/admin/dashboard'); // Pastikan Controller Admin ada
             case 'dokter':
                 return redirect()->to('/dokter/dashboard'); // Pastikan Controller Dokter ada
             case 'pendaftaran':
