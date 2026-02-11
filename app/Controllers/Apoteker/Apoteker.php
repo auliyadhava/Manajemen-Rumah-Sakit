@@ -31,22 +31,35 @@ class Apoteker extends BaseController
      */
     public function index()
     {
-        $data['resep'] = $this->prescription
-            ->select('prescriptions.*, patients.patient_id')
-            ->join('examinations', 'examinations.exam_id = prescriptions.exam_id')
-            ->join('appointments', 'appointments.appointment_id = examinations.appointment_id')
-            ->join('patients', 'patients.patient_id = appointments.patient_id')
-            ->join('payments', 'payments.appointment_id = appointments.appointment_id')
-            ->where('payments.payment_status', 'paid')
-            ->whereNotIn(
-                'prescriptions.prescription_id',
-                function($builder) {
-                    return $builder->select('prescription_id')->from('medicine_pickups');
-                }
-            )
-            ->findAll();
+        $db = \Config\Database::connect();
 
-        return view('Apoteker/index', $data);
+        $builder = $db->table('prescriptions');
+        $builder->select('
+        prescriptions.prescription_id, 
+        users.full_name as patient_name,
+        medicine_pickups.pickup_id
+    '); 
+        $builder->join('examinations', 'examinations.exam_id = prescriptions.exam_id');
+        $builder->join('appointments', 'appointments.appointment_id = examinations.appointment_id');
+        $builder->join('patients', 'patients.patient_id = appointments.patient_id');
+        $builder->join('users', 'users.user_id = patients.user_id');
+        $builder->join('payments', 'payments.appointment_id = appointments.appointment_id');
+
+        // Join ke tabel pengambilan
+        $builder->join('medicine_pickups', 'medicine_pickups.prescription_id = prescriptions.prescription_id', 'left');
+
+        // Filter 1: Harus sudah dibayar
+        $builder->where('payments.payment_status', 'paid');
+
+        // Filter 2: HANYA yang BELUM ada di tabel medicine_pickups
+        $builder->where('medicine_pickups.pickup_id IS NULL');
+
+        $resep = $builder->get()->getResultArray();
+
+        return view('apoteker/index', [
+            'resep' => $resep,
+            'title' => 'Dashboard Apoteker'
+        ]);
     }
 
     /**
@@ -70,23 +83,28 @@ class Apoteker extends BaseController
      */
     public function pickup($id)
     {
+        $db = \Config\Database::connect();
+        $db->transStart(); // Mulai proteksi
+
         $items = $this->item->where('prescription_id', $id)->findAll();
 
         foreach ($items as $item) {
-            // kurangi stok obat
-            $this->medicine->set(
-                'stock',
-                'stock - ' . $item['quantity'],
-                false
-            )->where('medicine_id', $item['medicine_id'])->update();
+            $this->medicine->set('stock', 'stock - ' . $item['quantity'], false)
+                ->where('medicine_id', $item['medicine_id'])
+                ->update();
         }
 
-        // simpan pengambilan obat
         $this->pickup->insert([
             'prescription_id' => $id,
-            'pickup_date' => date('Y-m-d H:i:s'),
-            'picked_by' => session()->get('user_id')
+            'pickup_date'     => date('Y-m-d H:i:s'),
+            'picked_by'       => session()->get('user_id')
         ]);
+
+        $db->transComplete(); // Selesaikan
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('error', 'Gagal memproses pengambilan obat.');
+        }
 
         return redirect()->to('/apoteker')->with('success', 'Obat berhasil diserahkan');
     }

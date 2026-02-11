@@ -28,16 +28,17 @@ $routes->group('apoteker', ['filter' => 'auth'], function ($routes) {
 });
 
 $routes->group('kasir', ['filter' => 'auth'], function ($routes) {
-    $routes->get('/', 'Kasir::index');
-    $routes->get('detail/(:num)', 'Kasir::detail/$1');
-    $routes->post('bayar/(:num)', 'Kasir::bayar/$1');
+    $routes->get('/', 'Cashier\Kasir::index');
+    $routes->get('detail/(:num)', 'Cashier\Kasir::detail/$1');
+    $routes->post('bayar/(:num)', 'Cashier\Kasir::bayar/$1');
+    $routes->post('prosesBayar', 'Cashier\Kasir::prosesBayar');
 });
 
 $routes->group('dokter', ['filter' => 'auth'], function ($routes) {
-    $routes->get('dashboard', 'DoctorController::index');
-    $routes->get('/', 'DoctorController::index');
-    $routes->get('examine/(:num)', 'DoctorController::examine/$1');
-    $routes->post('submitExamination', 'DoctorController::submitExamination');
+    $routes->get('dashboard', 'Doctor\DoctorController::index');
+    $routes->get('/', 'Doctor\DoctorController::index');
+    $routes->get('examine/(:num)', 'Doctor\DoctorController::examine/$1');
+    $routes->post('submitExamination', 'Doctor\DoctorController::submitExamination');
 });
 
 $routes->group('pasien', ['filter' => 'auth'], function ($routes) {

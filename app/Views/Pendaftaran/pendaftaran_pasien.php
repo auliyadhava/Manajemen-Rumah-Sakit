@@ -45,7 +45,7 @@
                                     </td>
                                     <td>
                                         <?php if ($row['status'] === 'waiting'): ?>
-                                            <a href="<?= base_url('pendaftaran/pendaftaran/konfirmasi/' . $row['appointment_id']) ?>"
+                                            <a href="<?= base_url('pendaftaran/konfirmasi/' . $row['appointment_id']) ?>"
                                                 class="btn btn-success btn-sm"
                                                 onclick="return confirm('Konfirmasi pasien ini?')">
                                                 <i class="bi bi-check-circle"></i> Konfirmasi

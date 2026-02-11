@@ -12,88 +12,78 @@ class Kasir extends BaseController
     {
         $db = \Config\Database::connect();
 
-        // 1. Mengambil statistik jumlah pembayaran yang sudah 'paid'
+        // Statistik jumlah yang sudah bayar (Gunakan nama kolom asli: payment_status)
         $totalSelesai = $db->table('payments')
             ->where('payment_status', 'paid')
             ->countAllResults();
 
-        // 2. Mengambil daftar pasien yang PERLU membayar
-        // Logic: Appointment status sudah 'completed' (dari Dokter) TAPI belum ada record di tabel payments
+        // Daftar pasien yang perlu membayar
         $pendingPayments = $db->table('appointments')
-            ->select('appointments.appointment_id, users.full_name, appointments.schedule_date, departments.name as poli')
+            ->select('
+            appointments.appointment_id, 
+            users.full_name, 
+            departments.name as poli, 
+            "50000" as total_amount, 
+            "pending" as payment_status
+        ')
             ->join('patients', 'patients.patient_id = appointments.patient_id')
             ->join('users', 'users.user_id = patients.user_id')
             ->join('departments', 'departments.department_id = appointments.department_id')
-            ->join('payments', 'payments.appointment_id = appointments.appointment_id', 'left') // Join kiri untuk cari yang null
-            ->where('appointments.status', 'completed') // Pasien sudah diperiksa dokter
-            ->where('payments.payment_id IS NULL')      // Belum ada data pembayaran
-            ->orderBy('appointments.schedule_date', 'ASC')
+            ->join('payments', 'payments.appointment_id = appointments.appointment_id', 'left')
+            ->where('appointments.status', 'completed')
+            ->where('payments.payment_id IS NULL')
             ->get()
             ->getResultArray();
 
-        $data = [
+        return view('kasir/dashboard', [
             'title'       => 'Dashboard Kasir',
             'total_bayar' => $totalSelesai,
             'pending'     => $pendingPayments
-        ];
-
-        return view('kasir/dashboard', $data);
+        ]);
     }
 
     public function prosesBayar()
     {
         $db = \Config\Database::connect();
-        $paymentModel = new PaymentModel();
 
-        // Ambil data dari form (pastikan view mengirim appointment_id & metode)
+        // 1. Ambil data dari form
         $appointmentId = $this->request->getPost('appointment_id');
-        $metodeBayar   = $this->request->getPost('payment_method'); // enum: 'cash', 'credit_card', 'insurance'
+        $metodeBayar   = $this->request->getPost('metode'); // Sesuaikan name di select view
 
         if (!$appointmentId) {
-            return redirect()->back()->with('error', 'ID Tagihan tidak ditemukan.');
+            return redirect()->back()->with('error', 'ID Transaksi tidak ditemukan.');
         }
 
-        // 1. Hitung Total Biaya Obat secara Otomatis
-        // Alur Join: appointments -> examinations -> prescriptions -> prescription_items -> medicines
+        // 2. Hitung Total Tagihan Otomatis (Join ke Resep)
         $queryTagihan = $db->table('appointments')
             ->join('examinations', 'examinations.appointment_id = appointments.appointment_id')
             ->join('prescriptions', 'prescriptions.exam_id = examinations.exam_id')
             ->join('prescription_items', 'prescription_items.prescription_id = prescriptions.prescription_id')
             ->join('medicines', 'medicines.medicine_id = prescription_items.medicine_id')
             ->where('appointments.appointment_id', $appointmentId)
-            ->selectSum('medicines.price * prescription_items.quantity', 'grand_total') // Hitung (Harga x Qty)
+            ->select('SUM(medicines.price * prescription_items.quantity) as grand_total', FALSE)
             ->get()
             ->getRow();
 
-        // Jika tidak ada obat, set 0
         $totalObat = $queryTagihan->grand_total ?? 0;
 
-        // Biaya Jasa Dokter/Pendaftaran (Bisa dibuat dinamis dari tabel config jika ada)
+        $totalObat = $queryTagihan->grand_total ?? 0;
         $biayaJasa = 50000;
-
         $totalAkhir = $totalObat + $biayaJasa;
 
-        // 2. Simpan ke tabel payments
-        // Catatan: Kolom di tabel Anda adalah 'amount', bukan 'total_amount'
+        // 3. Simpan ke tabel payments (Gunakan 'total_amount' sesuai rs (3).sql)
         try {
-            $paymentModel->insert([
+            $db->table('payments')->insert([
                 'appointment_id' => $appointmentId,
-                'amount'         => $totalAkhir,
-                'payment_method' => $metodeBayar,
+                'total_amount'   => $totalAkhir,
                 'payment_status' => 'paid',
                 'payment_date'   => date('Y-m-d H:i:s')
+                // 'method'       => $metodeBayar, // Aktifkan jika ada kolomnya
             ]);
 
-            // Opsional: Tidak perlu update status appointment ke 'completed' lagi 
-            // karena sudah dilakukan oleh Dokter. Tapi jika ingin mengubah status jadi 'paid' 
-            // di tabel appointment (jika kolom enum ditambah), lakukan di sini.
-
-            return redirect()->to('/kasir')->with(
-                'success',
-                'Pembayaran Berhasil! Total: Rp ' . number_format($totalAkhir, 0, ',', '.')
-            );
+            return redirect()->to('/kasir')->with('msg', 'Pembayaran Berhasil! Total: Rp ' . number_format($totalAkhir, 0, ',', '.'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menyimpan pembayaran: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
 

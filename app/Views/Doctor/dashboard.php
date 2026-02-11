@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body class="bg-gray-900 text-gray-100 font-sans">
 
     <div class="min-h-screen flex flex-col">
-        
+
         <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <i class="fas fa-hospital-user text-blue-500 text-2xl"></i>
@@ -29,7 +31,7 @@
 
         <main class="flex-grow p-6 lg:p-10">
             <div class="max-w-6xl mx-auto">
-                
+
                 <?php if (session()->getFlashdata('success')) : ?>
                     <div class="mb-6 p-4 bg-green-900/30 border border-green-500 text-green-400 rounded-lg flex items-center gap-3">
                         <i class="fas fa-check-circle"></i>
@@ -92,8 +94,8 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-5 text-right">
-                                                <a href="<?= base_url('doctor/examine/' . $p['appointment_id']) ?>" 
-                                                   class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-900/20">
+                                                <a href="<?= base_url('dokter/examine/' . $p['appointment_id']) ?>"
+                                                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-blue-900/20">
                                                     <i class="fas fa-stethoscope text-sm"></i>
                                                     Panggil Pasien
                                                 </a>
@@ -131,4 +133,5 @@
     </div>
 
 </body>
+
 </html>

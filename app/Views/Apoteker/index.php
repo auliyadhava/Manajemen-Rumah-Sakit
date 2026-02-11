@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Dashboard Apoteker</title>
     <style>
@@ -23,7 +24,7 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         table {
@@ -73,67 +74,80 @@
 
 <body>
 
-<div class="header">
-    <h2>Dashboard Apoteker</h2>
-</div>
+    <div class="header">
+        <h2>Dashboard Apoteker</h2>
+    </div>
 
-<div class="container">
+    <div class="container">
 
-    <div class="card">
+        <div class="card">
 
-        <h3>Resep Siap Diambil</h3>
+            <h3>Resep Siap Diambil</h3>
 
-        <?php if(session()->getFlashdata('success')): ?>
-            <div class="alert-success">
-                <?= session()->getFlashdata('success') ?>
-            </div>
-        <?php endif; ?>
+            <?php if (session()->getFlashdata('success')): ?>
+                <div class="alert-success">
+                    <?= session()->getFlashdata('success') ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if(session()->getFlashdata('error')): ?>
-            <div class="alert-error">
-                <?= session()->getFlashdata('error') ?>
-            </div>
-        <?php endif; ?>
+            <?php if (session()->getFlashdata('error')): ?>
+                <div class="alert-error">
+                    <?= session()->getFlashdata('error') ?>
+                </div>
+            <?php endif; ?>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID Resep</th>
-                    <th>ID Pasien</th>
-                    <th>Status Ambil</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID Resep</th>
+                        <th>ID Pasien</th>
+                        <th>Status Ambil</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
 
-            <tbody>
-                <?php if(!empty($resep)): ?>
-                    <?php foreach($resep as $r): ?>
+                <tbody>
+                    <?php if (!empty($resep)): ?>
+                        <?php foreach ($resep as $r): ?>
+                            <tr>
+                                <td><strong>#<?= $r['prescription_id'] ?></strong></td>
+
+                                <td><?= $r['patient_name'] ?></td>
+
+                                <td>
+                                    <span style="color: #28a745; font-weight: bold;">
+                                        <i class="fas fa-check-circle"></i> Lunas (Siap Ambil)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <?php if (empty($r['pickup_id'])): ?>
+                                        <form action="<?= base_url('apoteker/pickup/' . $r['prescription_id']) ?>" method="post">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn-ambil">Berikan Obat</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Selesai Diserahkan</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
                         <tr>
-                            <td><?= $r['prescription_id'] ?></td>
-                            <td><?= $r['patient_id'] ?></td>
-                            <td><?= $r['pickup_status'] ?></td>
-                            <td>
-                                <a class="btn btn-ambil"
-                                   href="/apoteker/ambil/<?= $r['prescription_id'] ?>">
-                                   Ambil Obat
-                                </a>
+                            <td colspan="4" align="center" style="padding: 40px; color: #666;">
+                                <img src="https://cdn-icons-png.flaticon.com/512/102/102661.png" width="50" style="opacity: 0.3;"><br><br>
+                                Belum ada resep yang lunas dari Kasir.
                             </td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="4" align="center">
-                            Tidak ada resep siap diambil
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
+                    <?php endif; ?>
+                </tbody>
 
-        </table>
+            </table>
+
+        </div>
 
     </div>
 
-</div>
-
 </body>
+
 </html>
